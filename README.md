@@ -1,219 +1,219 @@
-# 🛰️ ESPectre 모션 감지 시스템 설치 가이드
+# 🛰️ ESPectre Motion Detection System Setup Guide
 
-Wi-Fi CSI 기반 ESP32 모션 감지 시스템(ESPectre) 설치를 처음부터 끝까지 안내하는 가이드입니다.
+A complete, start-to-finish guide for setting up the Wi-Fi CSI–based ESP32 motion detection system (ESPectre).
 
-> **기준 환경**: ESP32-S3-N16R8 + Windows + Docker
-
----
-
-## 📋 목차
-
-- [전체 흐름](#-전체-흐름)
-- [0. 사전 준비](#-0-사전-준비)
-- [1. 프로젝트 다운로드 (Git 클론)](#-1-프로젝트-다운로드-git-클론)
-- [2. 가상환경 + ESPHome 설치](#-2-가상환경--esphome-설치)
-- [3. Wi-Fi 정보 입력 (secrets.yaml)](#-3-wi-fi-정보-입력-secretsyaml)
-- [4. ESP32에 펌웨어 굽기 (빌드 & 플래시)](#-4-esp32에-펌웨어-굽기-빌드--플래시)
-- [5. 터미널로 로그 보기](#-5-터미널로-로그-보기)
-- [6. Home Assistant 설치 (Docker)](#-6-home-assistant-설치-docker)
-- [7. ESP32와 Home Assistant 연동](#-7-esp32와-home-assistant-연동)
-- [8. 대시보드 만들기](#-8-대시보드-만들기)
-- [9. 외부 접속 설정 (선택)](#-9-외부-접속-설정-선택)
-- [10. 문제 해결](#-10-문제-해결)
-- [참고](#-참고)
+> **Reference environment**: ESP32-S3-N16R8 + Windows + Docker
 
 ---
 
-## 🔄 전체 흐름
+## 📋 Table of Contents
+
+- [Overview](#-overview)
+- [0. Prerequisites](#-0-prerequisites)
+- [1. Download the Project (Git Clone)](#-1-download-the-project-git-clone)
+- [2. Virtual Environment + ESPHome](#-2-virtual-environment--esphome)
+- [3. Enter Wi-Fi Info (secrets.yaml)](#-3-enter-wi-fi-info-secretsyaml)
+- [4. Flash the Firmware to the ESP32 (Build & Flash)](#-4-flash-the-firmware-to-the-esp32-build--flash)
+- [5. View Logs in the Terminal](#-5-view-logs-in-the-terminal)
+- [6. Install Home Assistant (Docker)](#-6-install-home-assistant-docker)
+- [7. Connect the ESP32 to Home Assistant](#-7-connect-the-esp32-to-home-assistant)
+- [8. Build a Dashboard](#-8-build-a-dashboard)
+- [9. Remote Access (Optional)](#-9-remote-access-optional)
+- [10. Troubleshooting](#-10-troubleshooting)
+- [References](#-references)
+
+---
+
+## 🔄 Overview
 
 ```
-프로젝트 다운로드 (git clone)
+Download project (git clone)
    ↓
-가상환경 + ESPHome 설치
+Virtual environment + ESPHome
    ↓
-Wi-Fi 정보 입력 (secrets.yaml)
+Enter Wi-Fi info (secrets.yaml)
    ↓
-ESP32에 펌웨어 굽기
+Flash firmware to the ESP32
    ↓
-터미널로 로그 확인 (모션 감지 작동 확인)
+Check logs in the terminal (verify motion detection works)
    ↓
-Home Assistant 설치 (Docker)
+Install Home Assistant (Docker)
    ↓
-ESP32 연동 → 대시보드 만들기
+Connect ESP32 → Build a dashboard
    ↓
-외부 접속 설정 (선택)
+Remote access (optional)
 ```
 
 ---
 
-## 🧰 0. 사전 준비
+## 🧰 0. Prerequisites
 
-### 하드웨어
+### Hardware
 
-- **ESP32-S3** 보드 (ESP32-S3-N16R8 기준)
-- **USB 데이터 케이블** — 데이터 전송이 가능한 케이블이어야 합니다 (충전 전용 ❌)
-- **2.4GHz Wi-Fi** — 5GHz 전용 네트워크는 ESP32가 연결하지 못합니다 ⚠️
+- **ESP32-S3** board (ESP32-S3-N16R8 reference)
+- **USB data cable** — must support data transfer (charge-only cables ❌)
+- **2.4GHz Wi-Fi** — the ESP32 cannot connect to 5GHz-only networks ⚠️
 
-### 소프트웨어
+### Software
 
-가이드를 따라가며 하나씩 설치합니다.
+You will install each of these as you follow the guide.
 
-| 프로그램 | 버전 | 용도 |
+| Program | Version | Purpose |
 | --- | --- | --- |
-| Python | 3.13 권장 (3.14는 피하기) | ESPHome 실행용 |
-| Git | 최신 | 프로젝트 다운로드용 |
-| ESPHome | 최신 | 펌웨어 빌드/플래시용 |
-| Docker Desktop | 최신 | Home Assistant 실행용 |
+| Python | 3.13 recommended (avoid 3.14) | Running ESPHome |
+| Git | latest | Downloading the project |
+| ESPHome | latest | Building/flashing firmware |
+| Docker Desktop | latest | Running Home Assistant |
 
 ---
 
-## 📥 1. 프로젝트 다운로드 (Git 클론)
+## 📥 1. Download the Project (Git Clone)
 
-### 1-1. Git 설치 확인
+### 1-1. Check that Git is installed
 
 ```powershell
 git --version
 ```
 
-> 버전이 표시되지 않으면 [git-scm.com/download/win](https://git-scm.com/download/win)에서 설치한 뒤 PowerShell을 새로 엽니다.
+> If no version appears, install from [git-scm.com/download/win](https://git-scm.com/download/win) and reopen PowerShell.
 
-### 1-2. 프로젝트 클론
+### 1-2. Clone the project
 
-> ⚠️ **경로에 한글이나 띄어쓰기가 있으면 빌드가 실패합니다.**
-> 예를 들어 "바탕 화면"은 띄어쓰기 때문에 사용할 수 없습니다.
-> → `C:\espectre` 처럼 영문·공백 없는 경로를 사용하세요.
+> ⚠️ **The build will fail if the path contains non-ASCII characters or spaces.**
+> For example, the Korean "바탕 화면" (Desktop) contains a space and cannot be used.
+> → Use an ASCII path without spaces, e.g. `C:\espectre`.
 
 ```powershell
 git clone https://github.com/francescopace/espectre.git
 cd espectre
 ```
 
-현재 위치 확인:
+Check your current location:
 
 ```powershell
 pwd
 ```
 
-> ✅ `C:\espectre` 가 나오면 성공입니다.
+> ✅ If it shows `C:\espectre`, you're good.
 
 ---
 
-## 📦 2. 가상환경 + ESPHome 설치
+## 📦 2. Virtual Environment + ESPHome
 
-### 2-1. 가상환경 생성
+### 2-1. Create a virtual environment
 
-`espectre` 폴더 안에서 실행합니다.
+Run this inside the `espectre` folder.
 
 ```powershell
 python -m venv venv
 ```
 
-생성 확인:
+Confirm:
 
 ```powershell
 dir
 ```
 
-> ✅ 목록에 `venv` 폴더가 보이면 성공입니다.
+> ✅ If you see a `venv` folder in the list, it worked.
 
-### 2-2. 실행 정책 설정 (처음 한 번만)
+### 2-2. Set the execution policy (one time only)
 
 ```powershell
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
 
-> 안내가 나오면 `Y` 입력 후 엔터를 누릅니다.
+> When prompted, type `Y` and press Enter.
 
-### 2-3. 가상환경 활성화
+### 2-3. Activate the virtual environment
 
 ```powershell
 .\venv\Scripts\Activate.ps1
 ```
 
-> ✅ 터미널 맨 앞에 `(venv)` 가 붙으면 성공입니다.
-> 예: `(venv) PS C:\espectre>`
+> ✅ Success when `(venv)` appears at the start of the prompt.
+> Example: `(venv) PS C:\espectre>`
 
-> 💡 PowerShell을 새로 열 때마다 가상환경은 해제됩니다. 작업 전 항상 아래 두 줄을 실행하세요.
+> 💡 The virtual environment is deactivated whenever you open a new PowerShell window. Always run these two lines before working:
 >
 > ```powershell
 > cd C:\espectre
 > .\venv\Scripts\Activate.ps1
 > ```
 
-### 2-4. ESPHome 설치
+### 2-4. Install ESPHome
 
-`(venv)` 상태에서 실행합니다.
+Run this while `(venv)` is active.
 
 ```powershell
 pip install esphome
 ```
 
-설치 확인:
+Confirm:
 
 ```powershell
 esphome version
 ```
 
-> ✅ 버전 번호가 나오면 성공입니다.
+> ✅ If a version number prints, it worked.
 
 ---
 
-## 🔑 3. Wi-Fi 정보 입력 (secrets.yaml)
+## 🔑 3. Enter Wi-Fi Info (secrets.yaml)
 
-> 개발용 설정 파일(`-dev.yaml`)은 Wi-Fi 정보를 `secrets.yaml`에서 읽어옵니다.
+> The dev config files (`-dev.yaml`) read Wi-Fi info from `secrets.yaml`.
 
-### 3-1. 파일 만들기
+### 3-1. Create the file
 
 ```powershell
 notepad examples\secrets.yaml
 ```
 
-> "새 파일을 만들겠냐"고 물으면 `예`를 클릭합니다.
+> If it asks whether to create a new file, click `Yes`.
 
-### 3-2. 내용 입력
+### 3-2. Enter the contents
 
-메모장에 아래 내용을 본인 Wi-Fi 정보로 수정해 입력합니다.
+In Notepad, fill in your own Wi-Fi info:
 
 ```yaml
-wifi_ssid: "본인_와이파이_이름"
-wifi_password: "본인_와이파이_비밀번호"
+wifi_ssid: "YOUR_WIFI_NAME"
+wifi_password: "YOUR_WIFI_PASSWORD"
 ```
 
-> ⚠️ **체크리스트**
-> - 대소문자를 정확히 입력했는지 확인
-> - 반드시 **2.4GHz** Wi-Fi 사용 (5GHz는 ESP32가 연결하지 못함)
+> ⚠️ **Checklist**
+> - Double-check exact upper/lowercase
+> - Use **2.4GHz** Wi-Fi (the ESP32 cannot connect to 5GHz)
 
 ---
 
-## ⚡ 4. ESP32에 펌웨어 굽기 (빌드 & 플래시)
+## ⚡ 4. Flash the Firmware to the ESP32 (Build & Flash)
 
-### 4-1. ESP32 연결
+### 4-1. Connect the ESP32
 
-USB 데이터 케이블로 ESP32-S3를 PC에 연결합니다.
+Connect the ESP32-S3 to your PC with a USB data cable.
 
-### 4-2. 포트 번호 확인 (선택)
+### 4-2. Check the COM port (optional)
 
-`Windows 키` + `R` → `devmgmt.msc` → `포트 (COM 및 LPT)` 펼치기
+`Windows key` + `R` → `devmgmt.msc` → expand `Ports (COM & LPT)`
 
-> `USB-SERIAL (COM3)` 처럼 표시됩니다. 괄호 안의 `COM3` 이 포트 번호입니다.
-> (보이지 않으면 보통 "1"입니다.)
+> It shows something like `USB-SERIAL (COM3)`. The `COM3` in parentheses is the port number.
+> (If not shown, it's usually "1".)
 
-### 4-3. 빌드 & 플래시 실행
+### 4-3. Build & flash
 
-`(venv)` 상태에서 실행합니다 (ESP32-S3 기준).
+Run this while `(venv)` is active (ESP32-S3 example).
 
 ```powershell
 esphome run examples\espectre-s3-dev.yaml
 ```
 
-> 다른 보드는 파일명만 변경하면 됩니다.
+> For other boards, just change the filename:
 > - ESP32-C6 → `espectre-c6-dev.yaml`
 > - ESP32-C3 → `espectre-c3-dev.yaml`
-> - ESP32 오리지널 → `espectre-esp32-dev.yaml`
+> - Original ESP32 → `espectre-esp32-dev.yaml`
 
-### 4-4. 포트 선택
+### 4-4. Choose the port
 
-컴파일 후 선택지가 나옵니다.
+After compiling, you'll see options.
 
 ```
 [1] COM3 (USB Serial Device (COM3))
@@ -221,24 +221,24 @@ esphome run examples\espectre-s3-dev.yaml
 (number):
 ```
 
-> ⭐ **첫 플래시는 반드시 USB로** 진행합니다. → `1` 입력 후 엔터
-> 첫 컴파일은 5~15분 걸릴 수 있습니다.
+> ⭐ **The first flash must be over USB.** → type `1` and press Enter.
+> The first compile can take 5–15 minutes.
 
-### 4-5. 플래시가 안 될 때
+### 4-5. If flashing fails
 
-> ⚠️ `no serial data received` 에러가 나면 ESP32를 강제 다운로드 모드로 진입시킵니다.
+> ⚠️ If you get a `no serial data received` error, force the ESP32 into download mode.
 
-"Connecting…" 문구가 보이는 순간:
+The moment you see "Connecting…":
 
 ```
-1. BOOT 버튼을 누른 채 유지
-2. RST 버튼을 짧게 눌렀다 떼기
-3. 1~2초 후 BOOT 버튼 떼기
+1. Press and hold the BOOT button
+2. Briefly press and release the RST button
+3. After 1–2 seconds, release BOOT
 ```
 
-> 그래도 안 되면 다른 USB 데이터 케이블로 교체해 보세요.
+> If it still fails, try a different USB data cable.
 
-### 4-6. 성공 확인
+### 4-6. Success indicators
 
 ```
 INFO Successfully compiled program.
@@ -246,21 +246,21 @@ INFO Successfully uploaded program.
 INFO Starting log output from COM...
 ```
 
-### 4-7. 자동 캘리브레이션 ⭐ 중요
+### 4-7. Auto-calibration ⭐ Important
 
-> ⚠️ **부팅 후 약 13초간 방에서 움직이지 마세요!**
-> 이 시간 동안 "빈 방 상태"를 기준으로 잡습니다. 사람이 움직이면 감지 정확도가 떨어집니다.
+> ⚠️ **Do not move in the room for ~13 seconds after boot!**
+> During this time it captures the "empty room" baseline. Movement reduces detection accuracy.
 
 ```
-1단계 Gain Lock        (약 3초)   → Wi-Fi 신호 안정화
-2단계 NBVI 캘리브레이션   (약 10초)  → 최적 신호 12개 선택 + 임계값 설정
+Step 1  Gain Lock          (~3s)   → Wi-Fi signal stabilization
+Step 2  NBVI calibration   (~10s)  → selects 12 best signals + sets threshold
 ```
 
 ---
 
-## 🖥️ 5. 터미널로 로그 보기
+## 🖥️ 5. View Logs in the Terminal
 
-플래시 이후 언제든 로그를 다시 보려면 아래를 실행합니다.
+To view logs again at any time after flashing:
 
 ```powershell
 cd C:\espectre
@@ -268,9 +268,9 @@ cd C:\espectre
 esphome logs examples\espectre-s3-dev.yaml
 ```
 
-> 포트 선택이 나오면 `1` (COM 포트)을 입력합니다.
+> When prompted for a port, choose `1` (the COM port).
 
-### 정상 로그 예시
+### Example of healthy logs
 
 ```
 [wifi] WiFi Connected
@@ -278,128 +278,128 @@ esphome logs examples\espectre-s3-dev.yaml
 mvmt: 0.20  thr: 1.00  motion: OFF
 ```
 
-| 항목 | 의미 |
+| Field | Meaning |
 | --- | --- |
-| mvmt (movement score) | 현재 움직임 강도 (0~10) |
-| thr (threshold) | 감지 임계값 (이 값을 넘으면 ON) |
-| motion | 움직임 감지 여부 (ON/OFF) |
-| free heap | 남은 메모리 (높을수록 좋음, 정상 100KB+) |
-| loop time | 처리 속도 (낮을수록 좋음, 정상 ~20ms) |
+| mvmt (movement score) | Current movement intensity (0–10) |
+| thr (threshold) | Detection threshold (ON when exceeded) |
+| motion | Motion detected or not (ON/OFF) |
+| free heap | Free memory (higher is better, normal 100KB+) |
+| loop time | Processing speed (lower is better, normal ~20ms) |
 
-### 테스트
+### Test
 
-> ESP32 앞에서 손을 흔들면 `mvmt` 값이 올라가고 `motion`이 `OFF → ON` 으로 바뀝니다.
+> Wave your hand in front of the ESP32: `mvmt` rises and `motion` flips `OFF → ON`.
 
-> 💡 로그를 멈추려면 `Ctrl + C`. 로그 도중 RST를 누르면 `serial port closed`가 뜨는데, USB가 잠시 끊긴 것으로 정상입니다.
+> 💡 Press `Ctrl + C` to stop logs. If you press RST during logging you'll see `serial port closed` — this just means the USB briefly disconnected, which is normal.
 
 ---
 
-## 🏠 6. Home Assistant 설치 (Docker)
+## 🏠 6. Install Home Assistant (Docker)
 
-> Home Assistant는 별도의 서버 프로그램입니다. Windows에서는 Docker로 실행합니다.
+> Home Assistant is a separate server program. On Windows, run it via Docker.
 
-### 6-1. Docker Desktop 설치
+### 6-1. Install Docker Desktop
 
-1. [docker.com/products/docker-desktop](https://www.docker.com/products/docker-desktop/)에서 **Windows + AMD64** 버전을 다운로드합니다.
-2. `Docker Desktop Installer.exe` 실행 → 기본 옵션으로 설치합니다.
-3. 필요 시 재부팅합니다.
-4. Docker Desktop 실행 → 약관 `Accept` → 가입 시 `Personal` 선택 (무료).
-5. 작업표시줄에 고래 아이콘 🐳 과 `Docker Desktop is running`이 보이면 준비 완료입니다.
+1. Download the **Windows + AMD64** version from [docker.com/products/docker-desktop](https://www.docker.com/products/docker-desktop/).
+2. Run `Docker Desktop Installer.exe` → install with default options.
+3. Reboot if required.
+4. Launch Docker Desktop → `Accept` the terms → choose `Personal` when signing up (free).
+5. When you see the whale icon 🐳 in the taskbar and `Docker Desktop is running`, you're ready.
 
-### 6-2. Home Assistant 컨테이너 실행
+### 6-2. Run the Home Assistant container
 
-PowerShell **새 창**에서 실행합니다 (ESPHome 로그 창은 그대로 둡니다).
+Run this in a **new** PowerShell window (leave the ESPHome log window open).
 
 ```powershell
 docker run -d --name homeassistant --privileged --restart=unless-stopped -e TZ=Asia/Seoul -v C:\homeassistant:/config -p 8123:8123 ghcr.io/home-assistant/home-assistant:stable
 ```
 
-> ⭐ `-p 8123:8123` 옵션이 있어야 `localhost:8123` 접속이 됩니다.
-> (`--network=host` 는 Windows Docker에서 작동하지 않습니다.)
+> ⭐ The `-p 8123:8123` option is required for `localhost:8123` access.
+> (`--network=host` does not work with Docker on Windows.)
 
-### 6-3. 실행 확인
+### 6-3. Verify it's running
 
 ```powershell
 docker ps
 ```
 
-> ✅ `homeassistant` 컨테이너 STATUS가 `Up ...` 이면 성공입니다.
+> ✅ Success when the `homeassistant` container STATUS is `Up ...`.
 
-### 6-4. 접속
+### 6-4. Open it
 
-브라우저에서 접속합니다.
+In a browser:
 
 ```
 http://localhost:8123
 ```
 
-> 1~2분 로딩 후 계정 생성 화면이 나옵니다. 이름/아이디/비밀번호를 입력해 계정을 만듭니다.
+> After 1–2 minutes of loading you'll see the account creation screen. Enter a name/username/password to create your account.
 
 ---
 
-## 🔗 7. ESP32와 Home Assistant 연동
+## 🔗 7. Connect the ESP32 to Home Assistant
 
-### 7-1. 자동 발견되는 경우
+### 7-1. If auto-discovered
 
-`설정 → 기기 및 서비스 → ESPHome`에서 `espectre` 기기가 보이면 `구성`을 클릭합니다.
+In `Settings → Devices & Services → ESPHome`, if you see the `espectre` device, click `Configure`.
 
-### 7-2. 자동 발견이 안 될 때 (Docker 환경에서 흔함)
+### 7-2. If not auto-discovered (common with Docker)
 
-ESP32의 IP 주소로 직접 추가합니다.
+Add it manually by IP address.
 
-**① ESP32 IP 확인** — ESPHome 로그에서 `IP Address: 192.168.x.x` 줄을 확인합니다.
+**① Check the ESP32 IP** — find the `IP Address: 192.168.x.x` line in the ESPHome logs.
 
-**② 수동 추가**
+**② Add manually**
 
 ```
-설정 → 기기 및 서비스 → 우측 하단 "통합 구성요소 추가" (+)
-→ "ESPHome" 검색 → 클릭
-→ Host: ESP32의 IP 주소 입력
-→ 제출
+Settings → Devices & Services → bottom-right "Add Integration" (+)
+→ search "ESPHome" → click
+→ Host: enter the ESP32 IP address
+→ Submit
 ```
 
-### 7-3. 생성되는 엔티티
+### 7-3. Entities created
 
-| 엔티티 | 설명 |
+| Entity | Description |
 | --- | --- |
-| sensor.espectre_movement_score | 움직임 강도 |
-| binary_sensor.espectre_motion_detected | 움직임 감지 ON/OFF |
-| number.espectre_threshold | 감지 임계값 (조정 가능) |
-| button.espectre_recalibrate | 재캘리브레이션 |
-| sensor.espectre_free_heap | 메모리 여유 |
-| sensor.espectre_loop_time | 처리 속도 |
+| sensor.espectre_movement_score | Movement intensity |
+| binary_sensor.espectre_motion_detected | Motion detected ON/OFF |
+| number.espectre_threshold | Detection threshold (adjustable) |
+| button.espectre_recalibrate | Recalibrate |
+| sensor.espectre_free_heap | Free memory |
+| sensor.espectre_loop_time | Processing speed |
 
-> 💡 실제 엔티티 ID는 기기 이름에 따라 다를 수 있습니다.
-> `설정 → 기기 및 서비스 → ESPHome → espectre → Sensors`에서 확인하세요.
+> 💡 Actual entity IDs may vary based on the device name.
+> Check under `Settings → Devices & Services → ESPHome → espectre → Sensors`.
 
 ---
 
-## 📊 8. 대시보드 만들기
+## 📊 8. Build a Dashboard
 
-### 8-1. 새 대시보드 생성
+### 8-1. Create a new dashboard
 
 ```
-설정 → 대시보드 → 우측 하단 "+ 대시보드 추가"
-→ "새 대시보드 (처음부터)" 선택
+Settings → Dashboards → bottom-right "+ Add Dashboard"
+→ choose "New dashboard (from scratch)"
 → Title: ESPectre Motion Monitor
 → Icon: mdi:walk
 → Create
 ```
 
-### 8-2. 카드 구성 (추천)
+### 8-2. Recommended cards
 
-| 순서 | 카드 종류 | 대상 엔티티 | 설명 |
+| # | Card type | Target entity | Description |
 | --- | --- | --- | --- |
-| 1 | Gauge | movement_score | 움직임 강도 게이지 (0~3) |
-| 2 | Entity | motion_detected | 현재 감지 상태 |
-| 3 | History Graph | movement_score + threshold | 실시간 그래프 (1시간) |
-| 4 | Entities | threshold | 임계값 슬라이더 |
-| 5 | Entities | recalibrate | 재캘리브레이션 |
-| 6 | Entities | free_heap, loop_time | 디버그 센서 |
+| 1 | Gauge | movement_score | Movement intensity gauge (0–3) |
+| 2 | Entity | motion_detected | Current detection state |
+| 3 | History Graph | movement_score + threshold | Live graph (1 hour) |
+| 4 | Entities | threshold | Threshold slider |
+| 5 | Entities | recalibrate | Recalibrate |
+| 6 | Entities | free_heap, loop_time | Debug sensors |
 
-### 8-3. YAML 방식 (Raw editor가 있을 때)
+### 8-3. YAML method (when a Raw editor is available)
 
-> 편집 모드 → 우측 상단 점 3개(⋮) → `Raw configuration editor` → 아래 내용을 붙여넣습니다.
+> Edit mode → top-right three dots (⋮) → `Raw configuration editor` → paste the following.
 
 ```yaml
 views:
@@ -447,68 +447,68 @@ views:
             name: Loop Time
 ```
 
-> 입력 후 `Save`를 클릭합니다.
+> Click `Save` after pasting.
 
-### 8-4. 카드 의미
+### 8-4. What the cards mean
 
-- **Movement Level (게이지)** — 실시간 움직임 강도. 초록(안정) ~ 빨강(활발)
-- **Threshold (임계값)** — 낮으면 민감, 높으면 둔감. 낮에는 높게, 밤에는 낮게 조정하면 노인 케어에 유용합니다.
-- **Recalibrate** — OFF가 정상 대기 상태. 위치나 가구가 바뀌면 ON으로 토글합니다 (13초 정지).
-- **Free Heap / Loop Time** — 시스템 건강 상태. 24시간 운영 시 메모리 누수 모니터링용입니다.
+- **Movement Level (gauge)** — live movement intensity. Green (calm) → red (active).
+- **Threshold** — lower = more sensitive, higher = less sensitive. Setting it higher during the day and lower at night is useful for elderly care.
+- **Recalibrate** — OFF is the normal idle state. Toggle ON when the location or furniture changes (stay still 13s).
+- **Free Heap / Loop Time** — system health. Useful for monitoring memory leaks during 24-hour operation.
 
 ---
 
-## 🌐 9. 외부 접속 설정 (선택)
+## 🌐 9. Remote Access (Optional)
 
-> 기본적으로 `localhost:8123` 은 본인 PC에서만 접속됩니다.
+> By default, `localhost:8123` is only reachable from your own PC.
 
-### 9-1. 같은 Wi-Fi 안에서 접속 (가장 간단)
+### 9-1. Access within the same Wi-Fi (simplest)
 
-**① 노트북 IP 확인**
+**① Find your PC's IP**
 
 ```powershell
 ipconfig
 ```
 
-> `IPv4 주소` (예: `192.168.1.100`)를 확인합니다.
+> Note the `IPv4 Address` (e.g. `192.168.1.100`).
 
-**② 같은 Wi-Fi의 다른 기기에서 접속**
+**② Access from another device on the same Wi-Fi**
 
 ```
 http://192.168.1.100:8123
 ```
 
-**③ 사용자 계정 추가**
+**③ Add a user account**
 
 ```
-설정 → 사람 → 사용자 추가 → 관리자 권한 OFF
+Settings → People → Add user → turn OFF admin privileges
 ```
 
-### 9-2. 외부(다른 네트워크)에서 접속 — ngrok (참고)
+### 9-2. Access from outside (another network) — ngrok (reference)
 
-**① 가입 및 다운로드** — [ngrok.com](https://ngrok.com) 가입 → Windows용 다운로드 → 압축 풀기
+**① Sign up and download** — sign up at [ngrok.com](https://ngrok.com) → download the Windows build → unzip.
 
-**② 인증 토큰 설정** (ngrok.exe가 있는 폴더에서)
+**② Set the auth token** (in the folder containing ngrok.exe)
 
 ```powershell
-.\ngrok.exe config add-authtoken (대시보드에서_복사한_토큰)
+.\ngrok.exe config add-authtoken (TOKEN_COPIED_FROM_DASHBOARD)
 ```
 
-**③ Home Assistant 프록시 허용 설정**
+**③ Allow the proxy in Home Assistant**
 
-컨테이너에 접속합니다.
+Enter the container:
 
 ```powershell
 docker exec -it homeassistant bash
 ```
 
-파일을 편집합니다 (vi 사용).
+Edit the file (using vi):
 
 ```bash
 vi /config/configuration.yaml
 ```
 
-> `i`를 눌러 편집 모드로 전환한 뒤 아래 내용을 추가합니다 (들여쓰기는 스페이스로 정확히).
+> Press `i` to enter edit mode, then add the following (indent with spaces, exactly):
 
 ```yaml
 http:
@@ -518,41 +518,41 @@ http:
     - ::1
 ```
 
-> `ESC` → `:wq` → 엔터 (저장 후 종료) → `exit`로 컨테이너를 빠져나옵니다.
+> `ESC` → `:wq` → Enter (save and quit) → `exit` to leave the container.
 
-**④ HA 재시작**
+**④ Restart HA**
 
 ```powershell
 docker restart homeassistant
 ```
 
-**⑤ ngrok 실행**
+**⑤ Run ngrok**
 
 ```powershell
 .\ngrok.exe http 8123 --host-header="localhost:8123"
 ```
 
-> `Forwarding` 줄의 `https://xxxx.ngrok-free.app` 주소를 보호자에게 공유합니다.
+> Share the `https://xxxx.ngrok-free.app` address from the `Forwarding` line.
 
-> ⚠️ 무료 ngrok은 재실행할 때마다 주소가 바뀝니다. 노트북이 켜져 있고 ngrok이 실행 중일 때만 접속됩니다. 안정적인 운영은 Nabu Casa(HA Cloud, 유료)를 권장합니다.
+> ⚠️ The free ngrok URL changes every time you restart it. It only works while the PC is on and ngrok is running. For stable operation, Nabu Casa (HA Cloud, paid) is recommended.
 
 ---
 
-## 🛠️ 10. 문제 해결
+## 🛠️ 10. Troubleshooting
 
-| 증상 | 원인 | 해결 |
+| Symptom | Cause | Fix |
 | --- | --- | --- |
-| `python` not recognized | PATH 미설정 | PATH 정리 후 PowerShell 새로 열기 |
-| 가상환경 활성화 안 됨 | 실행 정책 차단 | `Set-ExecutionPolicy RemoteSigned -Scope CurrentUser` |
-| whitespace in project paths | 경로에 한글/공백 | `C:\espectre` 영문 경로로 재클론 |
-| no serial data received | 부트 모드 문제 | BOOT 누른 채 RST 눌렀다 떼기 |
-| OTA로 업로드 시도 (IP 에러) | 포트 선택 잘못 | 다시 실행 후 `1`(COM 포트) 선택 |
-| WiFi connecting→disconnected 반복 | Wi-Fi 정보 오류 / 5GHz | secrets.yaml 확인, 2.4GHz 사용 |
-| localhost:8123 접속 안 됨 | 포트 매핑 누락 | `-p 8123:8123` 붙여 컨테이너 재생성 |
-| HA에 espectre 안 보임 | 자동 발견 실패 | ESPHome 통합에 IP 직접 추가 |
-| ngrok 400 Bad Request | 프록시 설정 누락 | configuration.yaml에 http 설정 + `--host-header` |
+| `python` not recognized | PATH not set | Fix PATH, reopen PowerShell |
+| Virtual env won't activate | Execution policy blocked | `Set-ExecutionPolicy RemoteSigned -Scope CurrentUser` |
+| whitespace in project paths | Non-ASCII/space in path | Re-clone to an ASCII path like `C:\espectre` |
+| no serial data received | Boot mode issue | Hold BOOT, tap RST, release |
+| Tries OTA upload (IP error) | Wrong port choice | Re-run and choose `1` (COM port) |
+| WiFi connecting→disconnected loop | Wrong Wi-Fi info / 5GHz | Check secrets.yaml, use 2.4GHz |
+| localhost:8123 not reachable | Missing port mapping | Recreate container with `-p 8123:8123` |
+| espectre not showing in HA | Auto-discovery failed | Add by IP in the ESPHome integration |
+| ngrok 400 Bad Request | Missing proxy config | Add `http:` config + `--host-header` |
 
-### 컨테이너 재생성 (포트 문제 등)
+### Recreate the container (port issues, etc.)
 
 ```powershell
 docker stop homeassistant
@@ -562,12 +562,12 @@ docker run -d --name homeassistant --privileged --restart=unless-stopped -e TZ=A
 
 ---
 
-## 📎 참고
+## 📎 References
 
-- ESPectre 공식 저장소 → [github.com/francescopace/espectre](https://github.com/francescopace/espectre)
-- 환경에 맞는 세부 튜닝은 저장소의 `TUNING.md`를 참고하세요.
-- 빨간/초록 LED는 보드 전원 표시이며, 로그가 정상이면 신경 쓰지 않아도 됩니다.
+- ESPectre official repo → [github.com/francescopace/espectre](https://github.com/francescopace/espectre)
+- For environment-specific tuning, see `TUNING.md` in the repo.
+- The red/green LEDs are board power indicators; if the logs look normal you can ignore them.
 
 ---
 
-> 이 가이드는 **ESP32-S3-N16R8 + Windows + Docker** 환경 기준으로 작성되었습니다.
+> This guide was written for the **ESP32-S3-N16R8 + Windows + Docker** environment.
