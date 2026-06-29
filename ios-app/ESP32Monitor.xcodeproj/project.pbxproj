@@ -1,0 +1,289 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		5FE7EEC1AC1ECA633E2D1207 /* ESP32MonitorApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AC5C3B208C63A5398913423 /* ESP32MonitorApp.swift */; };
+		64E46E4353DA771D780E1149 /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FA248B008767297A7274BA6 /* Config.swift */; };
+		44B27737F494E7433D655569 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAEAEDE36D9D276201B9A29A /* Models.swift */; };
+		46BA9E407B8F7A6A511F17B7 /* RoomStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 020F546C255470BBC7AB4453 /* RoomStatus.swift */; };
+		BAE4BF7E904125E48DC802D6 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = D564FCCCAA13FA31465D8340 /* APIClient.swift */; };
+		0E42CE53DB5B08D03D966735 /* LocationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15668F6CC818CD54E938A998 /* LocationViewModel.swift */; };
+		5D46F88FB1411ADC13CB7D22 /* RoomCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F1C722D57306887849CD86A /* RoomCardView.swift */; };
+		350981494F582B75D5B417D8 /* LocationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CCBF90E22E60A9B2762F6BD /* LocationView.swift */; };
+		3576F470041E8870AFEC4142 /* FloorPlanModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 521FCDC338B1B742A03E4CBA /* FloorPlanModels.swift */; };
+		E77C85F48CC7E140C74EEB61 /* FloorPlanAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = D602289A947F2774661ECE28 /* FloorPlanAPI.swift */; };
+		951F933FE164877BAA668DF1 /* FloorPlanViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 974E4B3B5D579359B5AE8A9B /* FloorPlanViewModel.swift */; };
+		E454FF4891309073482BD48A /* FloorPlanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90817C6BD5C6B031D1C4554D /* FloorPlanView.swift */; };
+		2AD4341F382CE8ADDF1A8D06 /* RoomScanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 986392EE2404FECB8795FBCB /* RoomScanView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		996AD237BC284D463E664FFE /* ESP32Monitor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ESP32Monitor.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		9AC5C3B208C63A5398913423 /* ESP32MonitorApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ESP32MonitorApp.swift; sourceTree = "<group>"; };
+		0FA248B008767297A7274BA6 /* Config.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Config.swift; sourceTree = "<group>"; };
+		CAEAEDE36D9D276201B9A29A /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		020F546C255470BBC7AB4453 /* RoomStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomStatus.swift; sourceTree = "<group>"; };
+		D564FCCCAA13FA31465D8340 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
+		15668F6CC818CD54E938A998 /* LocationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationViewModel.swift; sourceTree = "<group>"; };
+		6F1C722D57306887849CD86A /* RoomCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomCardView.swift; sourceTree = "<group>"; };
+		7CCBF90E22E60A9B2762F6BD /* LocationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationView.swift; sourceTree = "<group>"; };
+		521FCDC338B1B742A03E4CBA /* FloorPlanModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloorPlanModels.swift; sourceTree = "<group>"; };
+		D602289A947F2774661ECE28 /* FloorPlanAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloorPlanAPI.swift; sourceTree = "<group>"; };
+		974E4B3B5D579359B5AE8A9B /* FloorPlanViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloorPlanViewModel.swift; sourceTree = "<group>"; };
+		90817C6BD5C6B031D1C4554D /* FloorPlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloorPlanView.swift; sourceTree = "<group>"; };
+		986392EE2404FECB8795FBCB /* RoomScanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomScanView.swift; sourceTree = "<group>"; };
+		D1B914D3198C7162FA718DFA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		4FCBC29864E7C7752B7E193F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		71DC27D9F8E3B109C877BFC4 = {
+			isa = PBXGroup;
+			children = (
+				AF7FDBBE3D258A41820E0AC5 /* ESP32Monitor */,
+				113236722DEE1DC96F378B9D /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		AF7FDBBE3D258A41820E0AC5 /* ESP32Monitor */ = {
+			isa = PBXGroup;
+			children = (
+				9AC5C3B208C63A5398913423 /* ESP32MonitorApp.swift */,
+				0FA248B008767297A7274BA6 /* Config.swift */,
+				CAEAEDE36D9D276201B9A29A /* Models.swift */,
+				020F546C255470BBC7AB4453 /* RoomStatus.swift */,
+				D564FCCCAA13FA31465D8340 /* APIClient.swift */,
+				15668F6CC818CD54E938A998 /* LocationViewModel.swift */,
+				6F1C722D57306887849CD86A /* RoomCardView.swift */,
+				7CCBF90E22E60A9B2762F6BD /* LocationView.swift */,
+				521FCDC338B1B742A03E4CBA /* FloorPlanModels.swift */,
+				D602289A947F2774661ECE28 /* FloorPlanAPI.swift */,
+				974E4B3B5D579359B5AE8A9B /* FloorPlanViewModel.swift */,
+				90817C6BD5C6B031D1C4554D /* FloorPlanView.swift */,
+				986392EE2404FECB8795FBCB /* RoomScanView.swift */,
+				D1B914D3198C7162FA718DFA /* Info.plist */,
+			);
+			path = ESP32Monitor;
+			sourceTree = "<group>";
+		};
+		113236722DEE1DC96F378B9D /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				996AD237BC284D463E664FFE /* ESP32Monitor.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		42AEFBAE01D2DFD981F7DA7D /* ESP32Monitor */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5EB39897192143D4967C0D30 /* Build configuration list for PBXNativeTarget "ESP32Monitor" */;
+			buildPhases = (
+				C197A1D4E0DE673615AC32CB /* Sources */,
+				4FCBC29864E7C7752B7E193F /* Frameworks */,
+				8A6A452CEE30B0908A47D41D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ESP32Monitor;
+			productName = ESP32Monitor;
+			productReference = 996AD237BC284D463E664FFE /* ESP32Monitor.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		46F86FAA6BBF9AC94A7E4595 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					42AEFBAE01D2DFD981F7DA7D = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = 32D42B6A09FA42C6EFFC8E0F /* Build configuration list for PBXProject "ESP32Monitor" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 71DC27D9F8E3B109C877BFC4;
+			productRefGroup = 113236722DEE1DC96F378B9D /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				42AEFBAE01D2DFD981F7DA7D /* ESP32Monitor */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		8A6A452CEE30B0908A47D41D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		C197A1D4E0DE673615AC32CB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5FE7EEC1AC1ECA633E2D1207 /* ESP32MonitorApp.swift in Sources */,
+				64E46E4353DA771D780E1149 /* Config.swift in Sources */,
+				44B27737F494E7433D655569 /* Models.swift in Sources */,
+				46BA9E407B8F7A6A511F17B7 /* RoomStatus.swift in Sources */,
+				BAE4BF7E904125E48DC802D6 /* APIClient.swift in Sources */,
+				0E42CE53DB5B08D03D966735 /* LocationViewModel.swift in Sources */,
+				5D46F88FB1411ADC13CB7D22 /* RoomCardView.swift in Sources */,
+				350981494F582B75D5B417D8 /* LocationView.swift in Sources */,
+				3576F470041E8870AFEC4142 /* FloorPlanModels.swift in Sources */,
+				E77C85F48CC7E140C74EEB61 /* FloorPlanAPI.swift in Sources */,
+				951F933FE164877BAA668DF1 /* FloorPlanViewModel.swift in Sources */,
+				E454FF4891309073482BD48A /* FloorPlanView.swift in Sources */,
+				2AD4341F382CE8ADDF1A8D06 /* RoomScanView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		39449EDF7B151AF1BDA56BF2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				SWIFT_VERSION = 5.0;
+				SDKROOT = iphoneos;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_TESTABILITY = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		453FF012BC101FA2B9706FEF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				SWIFT_VERSION = 5.0;
+				SDKROOT = iphoneos;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		278C5A3EB8F05FE39E171C50 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_ASSET_SYMBOLS = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ESP32Monitor/Info.plist;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.espectre.ESP32Monitor;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		1AD3193D2AA82BB342AF9019 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_ASSET_SYMBOLS = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ESP32Monitor/Info.plist;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.espectre.ESP32Monitor;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		32D42B6A09FA42C6EFFC8E0F /* Build configuration list for PBXProject "ESP32Monitor" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				39449EDF7B151AF1BDA56BF2 /* Debug */,
+				453FF012BC101FA2B9706FEF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		5EB39897192143D4967C0D30 /* Build configuration list for PBXNativeTarget "ESP32Monitor" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				278C5A3EB8F05FE39E171C50 /* Debug */,
+				1AD3193D2AA82BB342AF9019 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 46F86FAA6BBF9AC94A7E4595 /* Project object */;
+}

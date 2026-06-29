@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Floor Plan (Live)</title>
+<style>
+  :root{
+    --bg:#fff; --ink:#212121; --muted:#727272; --line:#e4e6ea;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI','Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:var(--sans)}
+  .view{position:relative;width:100%;height:100%;display:flex;flex-direction:column}
+  svg{flex:1;width:100%;height:100%;display:block;background:#fafafa}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;align-items:center;
+    padding:8px 12px;font-size:13px;color:var(--muted);background:#fff;border-top:1px solid var(--line)}
+  .legend .it{display:flex;align-items:center;gap:6px}
+  .legend .sw{width:13px;height:13px;border-radius:4px}
+  .dot{position:absolute;top:10px;right:12px;display:flex;align-items:center;gap:6px;
+    font-size:12px;font-weight:700;color:var(--muted);background:rgba(255,255,255,.85);
+    padding:5px 10px;border-radius:99px}
+  .dot .d{width:8px;height:8px;border-radius:99px;background:#0d9b3f}
+  .dot.bad .d{background:#c0392b} .dot.bad{color:#c0392b}
+  .empty{position:absolute;inset:0;display:flex;flex-direction:column;gap:8px;
+    align-items:center;justify-content:center;text-align:center;padding:24px;color:var(--muted)}
+  .empty b{font-size:17px;color:var(--ink)}
+  .hidden{display:none!important}
+</style>
+</head>
+<body>
+<div class="view">
+  <div class="dot" id="dot"><span class="d"></span><span id="dotTxt">Connecting…</span></div>
+  <svg id="svg" viewBox="0 0 1000 680" preserveAspectRatio="xMidYMid meet"></svg>
+  <div class="legend" id="legend"></div>
+  <div class="empty hidden" id="empty">
+    <b>No floor plan saved yet</b>
+    <span>Create one in the editor first.</span>
+  </div>
+</div>
+
+<script>
+/* Config — same origin when served by the backend (API_BASE=""). Override via ?api=/?key=. */
+const params=new URLSearchParams(location.search);
+const CONFIG={
+  API_BASE: params.get('api') || "",
+  API_KEY:  params.get('key') || "YOUR_API_KEY",
+  POLL_MS:  parseInt(params.get('poll'))||3000,
+  SHOW_LEGEND: params.get('legend')!=="0",
+};
+const SVGNS="http://www.w3.org/2000/svg", VW=1000, VH=680, PAD=22;
+const STATUS={
+  active:    {label:"Active",    color:"#03a9f4"},
+  still:     {label:"Still",     color:"#0d9b3f"},
+  uncertain: {label:"Uncertain", color:"#ff9800"},
+  no_data:   {label:"No data",   color:"#9e9e9e"},
+  noSensor:  {label:"No sensor", color:"#cfd6e0"},
+};
+const $=id=>document.getElementById(id);
+const esc=s=>(s+"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+let rooms=[], liveStatus={};
+let devicesByKey={};
+let bg=null, bgW=1000, bgH=680;   // 배경 사진 + 크기
+
+async function apiGet(path){
+  const r=await fetch(CONFIG.API_BASE+path,{headers:{"X-API-Key":CONFIG.API_KEY}});
+  if(r.status===404)return null;
+  if(!r.ok)throw new Error("GET "+path+" → "+r.status);
+  return r.json();
+}
+function setDot(ok,msg){const d=$("dot");d.className="dot"+(ok?"":" bad");$("dotTxt").textContent=msg;}
+
+/* fit all polygons into the viewBox (auto-scale), same idea as iOS FloorPlanCanvas */
+function fit(){
+  const pts=rooms.flatMap(r=>r.polygon);
+  if(pts.length<2)return null;
+  const xs=pts.map(p=>+p[0]), ys=pts.map(p=>+p[1]);
+  const minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys);
+  const spanX=Math.max(maxX-minX,.001), spanY=Math.max(maxY-minY,.001);
+  const scale=Math.min((VW-2*PAD)/spanX,(VH-2*PAD)/spanY);
+  const offX=(VW-spanX*scale)/2-minX*scale, offY=(VH-spanY*scale)/2-minY*scale;
+  return p=>({x:offX+(+p[0])*scale, y:offY+(+p[1])*scale});
+}
+function statusOf(room){
+  if(!room.device_key)return "noSensor";
+  const s=liveStatus[room.device_key];
+  return (s&&STATUS[s])?s:"no_data";
+}
+/* active 방: 번지는 원(펄스) + 사람 모션 아이콘 + "Active" 라벨 */
+function mkAnimate(attr,values,dur){const a=document.createElementNS(SVGNS,"animate");
+  a.setAttribute("attributeName",attr);a.setAttribute("values",values);a.setAttribute("dur",dur);a.setAttribute("repeatCount","indefinite");return a;}
+function drawActive(g,ctr){
+  const C=STATUS.active.color;
+  const ring=document.createElementNS(SVGNS,"circle");
+  ring.setAttribute("cx",ctr.x);ring.setAttribute("cy",ctr.y);ring.setAttribute("r",28);
+  ring.setAttribute("fill","none");ring.setAttribute("stroke",C);ring.setAttribute("stroke-width","4");
+  ring.appendChild(mkAnimate("r","28;56","1.4s"));ring.appendChild(mkAnimate("opacity","0.7;0","1.4s"));
+  g.appendChild(ring);
+  const badge=document.createElementNS(SVGNS,"circle");
+  badge.setAttribute("cx",ctr.x);badge.setAttribute("cy",ctr.y);badge.setAttribute("r",28);
+  badge.setAttribute("fill","#fff");badge.setAttribute("stroke",C);badge.setAttribute("stroke-width","4");
+  g.appendChild(badge);
+  const icon=document.createElementNS(SVGNS,"path"); // MDI "run"
+  icon.setAttribute("d","M13.5,5.5A2,2 0 0,0 15.5,3.5A2,2 0 0,0 13.5,1.5A2,2 0 0,0 11.5,3.5A2,2 0 0,0 13.5,5.5M9.8,8.9L7,23H9.1L10.9,15L13,17V23H15V15.5L12.9,13.4L13.5,10.5C14.8,12 16.8,13 19,13V11C17.1,11 15.5,10 14.7,8.6L13.7,7C13.3,6.4 12.7,6 12,6C11.7,6 11.5,6.1 11.2,6.1L6,8.3V13H8V9.6L9.8,8.9Z");
+  icon.setAttribute("fill",C);icon.setAttribute("transform",`translate(${ctr.x-18},${ctr.y-18}) scale(1.5)`);
+  g.appendChild(icon);
+  const t=document.createElementNS(SVGNS,"text");
+  t.setAttribute("x",ctr.x);t.setAttribute("y",ctr.y+48);t.setAttribute("text-anchor","middle");
+  t.setAttribute("dominant-baseline","central");t.setAttribute("font-family","sans-serif");
+  t.setAttribute("font-weight","800");t.setAttribute("font-size","20");t.setAttribute("fill",C);
+  t.textContent="Active";g.appendChild(t);
+}
+function render(){
+  const svg=$("svg");
+  svg.setAttribute("viewBox", bg?`0 0 ${bgW} ${bgH}`:"0 0 1000 680");
+  svg.innerHTML="";
+  if(!rooms.length){$("empty").classList.remove("hidden");$("legend").classList.add("hidden");return;}
+  $("empty").classList.add("hidden");
+  let map;
+  if(bg){ // 사진 배경: 폴리곤이 이미지 좌표라 그대로(항등 매핑)
+    const im=document.createElementNS(SVGNS,"image");
+    im.setAttributeNS("http://www.w3.org/1999/xlink","href",bg);
+    im.setAttribute("x",0);im.setAttribute("y",0);im.setAttribute("width",bgW);im.setAttribute("height",bgH);
+    svg.appendChild(im);
+    map=p=>({x:+p[0],y:+p[1]});
+  }else{ map=fit(); if(!map)return; }
+  rooms.forEach(room=>{
+    if(!room.polygon||room.polygon.length<3)return;
+    const st=statusOf(room),c=STATUS[st].color;
+    const g=document.createElementNS(SVGNS,"g");
+    const path=document.createElementNS(SVGNS,"path");
+    let d="";room.polygon.forEach((p,i)=>{const q=map(p);d+=(i?"L":"M")+q.x+" "+q.y+" ";});d+="Z";
+    path.setAttribute("d",d);
+    path.setAttribute("fill",c);path.setAttribute("fill-opacity",st==="noSensor"?".10":".30");
+    path.setAttribute("stroke",c);path.setAttribute("stroke-width",3);
+    path.setAttribute("stroke-linejoin","round");
+    if(st==="noSensor")path.setAttribute("stroke-dasharray","8 6");
+    g.appendChild(path);
+    // 매핑된 폴리곤 bbox → 이름은 방 위쪽, 상태표시는 방 중앙
+    const mp=room.polygon.map(p=>map(p));
+    const xs=mp.map(p=>p.x),ys=mp.map(p=>p.y);
+    const minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys);
+    const cxv=(minX+maxX)/2, cyv=(minY+maxY)/2;
+    const ctr={x:cxv,y:cyv};
+    const nm=document.createElementNS(SVGNS,"text");
+    nm.setAttribute("x",cxv);nm.setAttribute("y",minY+24);nm.setAttribute("text-anchor","middle");
+    nm.setAttribute("dominant-baseline","central");nm.setAttribute("font-family","sans-serif");
+    nm.setAttribute("font-weight","800");nm.setAttribute("font-size","26");
+    nm.setAttribute("fill",st==="noSensor"?"#9aa4b2":c);nm.textContent=room.name;
+    g.appendChild(nm);
+    if(st==="active"){
+      drawActive(g,ctr);
+    }else{
+      const sub=document.createElementNS(SVGNS,"text");
+      sub.setAttribute("x",cxv);sub.setAttribute("y",cyv);sub.setAttribute("text-anchor","middle");
+      sub.setAttribute("dominant-baseline","central");sub.setAttribute("font-family","sans-serif");
+      sub.setAttribute("font-weight","700");sub.setAttribute("font-size","20");
+      sub.setAttribute("fill",STATUS[st].color);sub.textContent=STATUS[st].label;
+      g.appendChild(sub);
+    }
+    svg.appendChild(g);
+  });
+  if(CONFIG.SHOW_LEGEND){
+    $("legend").classList.remove("hidden");
+    $("legend").innerHTML=["active","still","uncertain","no_data","noSensor"]
+      .map(k=>`<span class="it"><span class="sw" style="background:${STATUS[k].color};opacity:${k==='noSensor'?.5:.85}"></span>${STATUS[k].label}</span>`).join("");
+  }else $("legend").classList.add("hidden");
+}
+
+async function loadPlan(){
+  const fp=await apiGet("/api/v1/floorplans/latest");
+  if(fp&&fp.data&&Array.isArray(fp.data.rooms)){
+    rooms=fp.data.rooms; bg=fp.data.image||null; bgW=fp.data.imageW||1000; bgH=fp.data.imageH||680;
+  }else{ rooms=[]; bg=null; }
+}
+async function poll(){
+  try{
+    const devices=await apiGet("/api/v1/devices")||[];
+    devicesByKey={};devices.forEach(d=>devicesByKey[d.device_key]=d);
+    const map={};
+    await Promise.all(devices.map(async d=>{
+      try{const s=await apiGet("/api/v1/devices/"+d.id+"/state");map[d.device_key]=s?(s.state||"no_data"):"no_data";}
+      catch(e){map[d.device_key]="no_data";}
+    }));
+    liveStatus=map;
+    setDot(true,"Live");
+  }catch(e){ setDot(false,"Disconnected"); }
+  render();
+}
+async function init(){
+  try{ await loadPlan(); }catch(e){ rooms=[]; }
+  render();
+  poll();
+  setInterval(poll, CONFIG.POLL_MS);
+  setInterval(async()=>{ if(!rooms.length){ try{await loadPlan();render();}catch(e){} } }, 10000);
+}
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- 로컬 평문 HTTP 허용 (백엔드가 http://192.168.1.83:8000) -->
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
+	<!-- iOS 14+ 로컬 네트워크 접근 권한 안내문 -->
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>같은 집 Wi-Fi의 모니터링 서버에서 센서 상태를 가져오기 위해 로컬 네트워크에 접속합니다.</string>
+	<!-- RoomPlan 평면도 스캔용 카메라 권한 -->
+	<key>NSCameraUsageDescription</key>
+	<string>집 평면도를 측정(스캔)하기 위해 카메라를 사용합니다.</string>
+	<!-- 대시보드에서 espectre://scan 으로 앱을 열기 위한 URL scheme -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.espectre.ESP32Monitor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>espectre</string>
+			</array>
+		</dict>
+	</array>
+</dict>
+</plist>

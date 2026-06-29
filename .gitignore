@@ -1,0 +1,28 @@
+# --- secrets (절대 커밋 금지) ---
+.env
+*.env
+!.env.example
+
+# --- python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+
+# --- db / data ---
+db_data/
+*.sqlite3
+
+# --- os / editor ---
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# --- xcode (ios-app) ---
+*.xcuserstate
+xcuserdata/
+DerivedData/
+build/
