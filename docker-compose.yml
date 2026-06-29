@@ -1,0 +1,44 @@
+# 전체 스택: db (TimescaleDB) + backend (FastAPI)
+# Day 1-2 에서는 db 만 띄웁니다:  docker compose up -d db
+# (backend 는 Day 3-5 에서 코드/Dockerfile 작성 후 기동)
+
+services:
+  db:
+    image: timescale/timescaledb:latest-pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      API_KEY: ${API_KEY}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      # 활동 분류 임계값 (실측: ESPectre movement_score 는 0~16+ 스케일, 바이너리 임계값 5.0)
+      ACTIVITY_ACTIVE_THRESHOLD: "5.0"
+      ACTIVITY_STILL_THRESHOLD: "2.0"
+      ACTIVITY_SPIKE_DELTA: "8.0"
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+
+volumes:
+  db_data:

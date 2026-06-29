@@ -1,0 +1,85 @@
+# ===========================================================================
+# ESPectre 대시보드 (Lovelace) — 복붙용
+# ---------------------------------------------------------------------------
+# 적용법 (둘 중 하나):
+#  A) 통째로:  대시보드 → 우상단 ⋮(연필 옆) → "Edit dashboard"
+#             → 다시 ⋮ → "Raw configuration editor" → 이 파일 내용 붙여넣기 → Save
+#  B) 카드 1개씩: 대시보드 편집 → "+ ADD CARD" → 맨 아래 "Manual"
+#             → 아래 `cards:` 항목 하나를 복사해 붙여넣기
+#
+# ⚠️ 반드시 바꿀 것:
+#  - 모든 192.168.0.XX  →  PC의 현재 IP (cmd: ipconfig → Wireless LAN adapter Wi-Fi IPv4)
+#  - 엔티티 이름(sensor.espectre_*, binary_sensor.espectre_*) →
+#      HA → 설정 → 기기 및 서비스 → ESPectre 에서 실제 엔티티 이름으로 (다르면)
+# ===========================================================================
+
+title: ESPectre
+views:
+  # =========================================================================
+  # 1) LOCATION 탭 — 평면도(실시간) + 센서 값 + 그래프
+  # =========================================================================
+  - title: Location
+    path: location
+    icon: mdi:floor-plan
+    cards:
+      # --- 평면도 보기 전용 (백엔드가 서빙하는 실시간 도면) ---
+      - type: iframe
+        url: http://192.168.0.XX:8000/floorplan/view
+        aspect_ratio: 56%
+
+      # --- 거실 센서 실시간 값 (검증/표시용) ---
+      - type: entities
+        title: 거실 (ESPectre)
+        entities:
+          - entity: binary_sensor.espectre_motion_detected
+            name: 움직임 감지
+          - entity: sensor.espectre_movement_score
+            name: 움직임 강도
+
+      # --- 최근 1시간 움직임 그래프 ---
+      - type: history-graph
+        title: 움직임 추이
+        hours_to_show: 1
+        entities:
+          - entity: sensor.espectre_movement_score
+
+  # =========================================================================
+  # 2) SETUP 탭 — 평면도 에디터 (방 그리기/센서 연결/저장)
+  # =========================================================================
+  - title: Floor Plan Setup
+    path: floorplan-setup
+    icon: mdi:pencil-ruler
+    cards:
+      - type: iframe
+        url: http://192.168.0.XX:8000/floorplan
+        aspect_ratio: 56%
+
+  # =========================================================================
+  # 3) (대안) PICTURE ELEMENTS — 백엔드 없이 HA 엔티티만으로
+  #    floorplan 이미지를 config/www/ 에 두고 사용. 위 iframe 대신 쓰고 싶을 때.
+  # =========================================================================
+  - title: Floor Plan (Image)
+    path: floorplan-image
+    icon: mdi:image
+    cards:
+      - type: picture-elements
+        # config/www/floorplan.png 에 평면도 이미지를 두면 주소가 /local/floorplan.png
+        image: /local/floorplan.png
+        elements:
+          # 거실 위치에 상태 텍스트 (Detected / Clear)
+          - type: state-label
+            entity: binary_sensor.espectre_motion_detected
+            style:
+              top: 40%
+              left: 30%
+              font-size: 16px
+              font-weight: bold
+              color: "black"
+          # 같은 위치에 상태 아이콘 (상태에 따라 색)
+          - type: state-icon
+            entity: binary_sensor.espectre_motion_detected
+            tap_action:
+              action: more-info
+            style:
+              top: 31%
+              left: 30%
